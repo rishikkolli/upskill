@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Upskill Lab</title>
+<meta name="description" content="Daily plan: 3–4 hours of learning, 1–2 hours of building, and flashcards across software, data and AI engineering.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one column. Header with a phase map, three tabs (Today, Plan, Cards). Phase colors carry the track identity everywhere. */
+:root{
+  --bg:#F2F4F7; --paper:#FFFFFF; --ink:#121826; --ink-2:#465066; --ink-3:#7A8397; --line:#DDE2EA;
+  --accent:#2F6FD0; --ok:#1E8A5A; --ok-tint:#E2F3EA; --warn:#C2410C; --warn-tint:#FDEDE4; --chip:#EEF1F6;
+  --f-display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  --shadow:0 1px 2px rgba(18,24,38,.05),0 6px 20px rgba(18,24,38,.06);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0E121A; --paper:#161C27; --ink:#E8ECF3; --ink-2:#AEB7C8; --ink-3:#7C869A; --line:#28303F;
+  --accent:#6EA2FF; --ok:#46C487; --ok-tint:#16301F; --warn:#F28A5B; --warn-tint:#33201A; --chip:#1E2533;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E121A; --paper:#161C27; --ink:#E8ECF3; --ink-2:#AEB7C8; --ink-3:#7C869A; --line:#28303F;
+  --accent:#6EA2FF; --ok:#46C487; --ok-tint:#16301F; --warn:#F28A5B; --warn-tint:#33201A; --chip:#1E2533;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25); color-scheme:dark}
+
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:400 1rem/1.55 var(--f-body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:900px;margin:0 auto;padding-block:28px 64px;display:flex;flex-direction:column;gap:22px}
+h1,h2,h3{font-family:var(--f-display);margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1{font-size:clamp(2rem,6vw,2.8rem);font-weight:800;line-height:1}
+h2{font-size:1.55rem;font-weight:800;line-height:1.15}
+h3{font-size:1.05rem;font-weight:600}
+p{margin:0}
+a{color:var(--accent)}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.eyebrow{font:600 .7rem var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* header */
+.top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:14px}
+.top .sub{color:var(--ink-2);margin-top:6px;max-width:52ch}
+.stats{display:flex;gap:8px;flex-wrap:wrap}
+.stat{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:8px 12px;min-width:84px}
+.stat b{display:block;font:600 1.15rem var(--f-mono)}
+.stat span{font:600 .62rem var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+
+/* phase map */
+.map{display:flex;flex-direction:column;gap:8px}
+.track{display:flex;gap:3px;height:14px;border-radius:7px;overflow:hidden;background:var(--chip)}
+.seg{position:relative;height:100%;background:color-mix(in srgb,var(--c) 22%,transparent)}
+.seg i{position:absolute;inset:0 auto 0 0;background:var(--c);border-radius:0}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.78rem;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend span::before{content:"";width:10px;height:10px;border-radius:3px;background:var(--c)}
+
+.banner{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between;background:var(--warn-tint);color:var(--ink);border-radius:12px;padding:12px 16px;font-size:.92rem}
+.banner b{color:var(--warn);font-family:var(--f-mono)}
+
+/* tabs */
+.tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:5;padding-top:6px}
+.tab{background:none;border:0;border-bottom:3px solid transparent;padding:10px 14px;font-weight:600;color:var(--ink-3);cursor:pointer}
+.tab[aria-selected="true"]{color:var(--ink);border-color:var(--ink)}
+.tab .n{font:600 .7rem var(--f-mono);background:var(--warn);color:#fff;border-radius:999px;padding:1px 7px;margin-left:6px}
+
+/* day card */
+.daynav{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.btn{background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:7px 14px;cursor:pointer;font-weight:500;font-size:.9rem}
+.btn:hover{border-color:var(--ink-3)}
+.btn:disabled{opacity:.35;cursor:default}
+.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.day{background:var(--paper);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
+.day-head{padding:18px 20px 16px;border-top:6px solid var(--c);display:flex;flex-direction:column;gap:8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chip{font:600 .68rem var(--f-mono);letter-spacing:.08em;text-transform:uppercase;padding:4px 9px;border-radius:999px;background:var(--chip);color:var(--ink-2)}
+.chip.ph{background:color-mix(in srgb,var(--c) 16%,transparent);color:var(--c)}
+.blocks{display:grid;grid-template-columns:1fr;border-top:1px solid var(--line)}
+.block{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:10px;min-width:0}
+.block:last-child{border-bottom:0}
+.bhead{display:flex;align-items:center;gap:10px}
+.bhead h3{flex:1}
+.dur{font:600 .72rem var(--f-mono);color:var(--ink-3)}
+.check{appearance:none;width:22px;height:22px;border:2px solid var(--line);border-radius:6px;cursor:pointer;display:grid;place-items:center;flex:none;background:var(--paper)}
+.check:checked{background:var(--ok);border-color:var(--ok)}
+.check:checked::after{content:"";width:6px;height:11px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.block.done h3{color:var(--ok)}
+ul.obj{margin:0;padding-left:1.1em;color:var(--ink-2)}
+ul.obj li{margin:2px 0}
+.res{display:flex;flex-wrap:wrap;gap:8px}
+.res a{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:7px 11px;font-size:.88rem;background:var(--bg)}
+.res a:hover{border-color:var(--c,var(--accent))}
+.res a small{font:600 .62rem var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.build{background:var(--bg);border-radius:10px;padding:12px 14px;color:var(--ink)}
+.allday{margin:0 20px 16px;padding:10px 14px;border-radius:10px;background:var(--ok-tint);color:var(--ok);font-weight:600;font-size:.9rem}
+.note{color:var(--ink-3);font-size:.85rem}
+
+/* plan */
+.plan{display:flex;flex-direction:column;gap:12px}
+.ph-group{background:var(--paper);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.ph-group>summary{list-style:none;cursor:pointer;padding:14px 18px;display:flex;gap:10px;align-items:center;border-left:6px solid var(--c)}
+.ph-group>summary::-webkit-details-marker{display:none}
+.ph-group>summary h3{flex:1}
+.ph-group>summary .g{color:var(--ink-3);font-size:.85rem}
+.row{display:grid;grid-template-columns:92px 1fr auto;gap:10px;align-items:center;padding:9px 18px;border-top:1px dashed var(--line);cursor:pointer}
+.row:hover{background:var(--bg)}
+.row .d{font:500 .78rem var(--f-mono);color:var(--ink-3)}
+.row .t{min-width:0}
+.dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--line)}
+.dot.half{border-color:var(--c);background:linear-gradient(90deg,var(--c) 50%,transparent 50%)}
+.dot.full{border-color:var(--ok);background:var(--ok)}
+.row.today{background:color-mix(in srgb,var(--c) 10%,transparent)}
+.offs{display:flex;flex-direction:column;gap:6px;font-size:.88rem;color:var(--ink-2)}
+
+/* cards */
+.deckbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.fbtn{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:5px 11px;font-size:.82rem;cursor:pointer}
+.fbtn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.stage{display:flex;flex-direction:column;align-items:center;gap:14px}
+.card{width:100%;max-width:620px;min-height:260px;perspective:1200px;cursor:pointer;background:none;border:0;padding:0}
+.card-in{position:relative;width:100%;min-height:260px;transition:transform .45s cubic-bezier(.2,.7,.2,1);transform-style:preserve-3d}
+.card.flip .card-in{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--paper);border:1px solid var(--line);border-top:6px solid var(--c);border-radius:16px;box-shadow:var(--shadow);padding:22px 24px;display:flex;flex-direction:column;gap:12px;text-align:left}
+.face.back{transform:rotateY(180deg)}
+.face .q{font:600 1.3rem/1.35 var(--f-display);flex:1;display:flex;align-items:center}
+.face .a{font-size:1.08rem;line-height:1.5;flex:1;display:flex;align-items:center}
+.face .meta{display:flex;justify-content:space-between;font:600 .66rem var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.grade{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.grade button{border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:10px 18px;cursor:pointer;font-weight:600;min-width:110px}
+.grade .again{color:var(--warn)} .grade .good{color:var(--accent)} .grade .easy{color:var(--ok)}
+.grade small{display:block;font:500 .66rem var(--f-mono);color:var(--ink-3)}
+.empty{text-align:center;color:var(--ink-2);padding:30px 10px;display:flex;flex-direction:column;gap:12px;align-items:center}
+.boxes{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;width:100%;max-width:620px}
+.box{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:6px;text-align:center}
+.box b{display:block;font:600 1rem var(--f-mono)}
+.box span{font:600 .58rem var(--f-mono);color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em}
+.hint{font-size:.78rem;color:var(--ink-3)}
+footer{color:var(--ink-3);font-size:.8rem;border-top:1px solid var(--line);padding-top:14px}
+@media (min-width:760px){.blocks{grid-template-columns:1.4fr 1fr}.block.learn{grid-row:span 2;border-right:1px solid var(--line)}}
+@media (max-width:520px){.row{grid-template-columns:70px 1fr auto;padding:9px 12px}.grade button{min-width:90px;padding:10px 12px}}
+@media (prefers-reduced-motion:reduce){.card-in{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">Software · Data · AI engineering</div>
+      <h1>Upskill Lab</h1>
+      <p class="sub">Every day: 3–4 hours learning, 1–2 hours building, then flashcards. Visual resources first.</p>
+    </div>
+    <div class="stats">
+      <div class="stat"><b id="s-streak">0</b><span>Day streak</span></div>
+      <div class="stat"><b id="s-lessons">0/0</b><span>Lessons</span></div>
+      <div class="stat"><b id="s-due">0</b><span>Cards due</span></div>
+    </div>
+  </header>
+
+  <section class="map" aria-label="Progress by phase">
+    <div class="track" id="track"></div>
+    <div class="legend" id="legend"></div>
+  </section>
+
+  <div class="banner" id="banner" hidden></div>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" id="t-today" aria-selected="true">Today</button>
+    <button class="tab" role="tab" id="t-plan" aria-selected="false">Plan</button>
+    <button class="tab" role="tab" id="t-cards" aria-selected="false">Flashcards<span class="n" id="t-due" hidden>0</span></button>
+  </nav>
+
+  <main id="v-today"></main>
+  <main id="v-plan" hidden></main>
+  <main id="v-cards" hidden></main>
+
+  <footer>Progress, checkmarks and flashcard history are saved in this browser. Rest days and trail days are built into the schedule; lessons shift around them.</footer>
+</div>
+
+<script src="data.js"></script>
+<script>
+(function(){
+const PH=window.PHASES, L=window.LESSONS, RES=window.RES;
+const phase=id=>PH.find(p=>p.id===id);
+const START='2026-10-21';
+// Days off: AZT trail blocks and the Central America trip. Sundays are review days.
+const OFF=[
+  ['2026-11-07','2026-11-08','trail','AZT Block 1: Happy Jack → Flagstaff'],
+  ['2026-11-26','2026-11-29','trail','AZT Block 2: Thanksgiving'],
+  ['2026-12-24','2026-12-27','trail','AZT Block 3: Christmas'],
+  ['2026-12-31','2027-01-03','trail','AZT Block 4: New Year’s'],
+  ['2027-01-05','2027-01-26','travel','Central America trip'],
+  ['2027-03-13','2027-03-14','trail','AZT Block 5a'],['2027-03-27','2027-03-28','trail','AZT Block 5b'],
+  ['2027-04-10','2027-04-11','trail','AZT Block 6a'],['2027-04-24','2027-04-25','trail','AZT Block 6b'],
+  ['2027-05-01','2027-05-02','trail','AZT Block 7'],['2027-05-08','2027-05-09','trail','AZT Block 8a'],
+  ['2027-05-15','2027-05-16','trail','AZT Block 8b'],['2027-05-28','2027-05-31','trail','AZT Block 9']
+];
+const DEADLINE='2026-11-06';
+
+// ---------- dates ----------
+const pad=n=>String(n).padStart(2,'0');
+const isoOf=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const parse=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d);};
+const addD=(s,n)=>{const d=parse(s);d.setDate(d.getDate()+n);return isoOf(d);};
+const TODAY=isoOf(new Date());
+const fmt=(s,o)=>parse(s).toLocaleDateString('en-US',o||{weekday:'short',month:'short',day:'numeric'});
+const offOf=s=>OFF.find(o=>s>=o[0]&&s<=o[1]);
+
+// ---------- schedule ----------
+const DAYS=[], byDate={}, lessonDate=[];
+for(let s=START,i=0; i<L.length; s=addD(s,1)){
+  const off=offOf(s), dow=parse(s).getDay();
+  let day;
+  if(off) day={date:s,kind:off[2],label:off[3]};
+  else if(dow===0) day={date:s,kind:'review'};
+  else {day={date:s,kind:'lesson',idx:i}; lessonDate[i]=s; i++;}
+  DAYS.push(day); byDate[s]=day;
+}
+const LAST=DAYS[DAYS.length-1].date;
+
+// ---------- storage ----------
+const load=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}};
+const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+let done=load('ul-done',{});   // {date:{learn,build,cards}}
+let srs=load('ul-srs',{});     // {cardId:{b:box,due:date}}
+let cardsDone=load('ul-cardlog',{}); // {date:count}
+
+// ---------- cards ----------
+const CARDS=[]; L.forEach((l,i)=>l[5].forEach((c,j)=>CARDS.push({id:i+'.'+j,li:i,ph:l[0],q:c[0],a:c[1]})));
+const INTERVAL=[0,1,3,7,14,30,60];
+const unlocked=c=>lessonDate[c.li]<=TODAY;
+const isDue=c=>{const s=srs[c.id]; return !s || s.due<=TODAY;};
+const dueCards=(all,ph)=>CARDS.filter(c=>(all||unlocked(c))&&(!ph||c.ph===ph)&&isDue(c));
+
+// ---------- header ----------
+function lessonComplete(i){const d=done[lessonDate[i]];return !!(d&&d.learn&&d.build);}
+function streak(){
+  let n=0, s=TODAY;
+  const active=d=>{const x=done[d]; return x&&(x.learn||x.build||x.cards)||(cardsDone[d]>0);};
+  if(!active(s)) s=addD(s,-1);
+  while(s>=START){
+    const day=byDate[s];
+    if(active(s)) n++;
+    else if(!(day&&(day.kind==='trail'||day.kind==='travel'))) break;
+    s=addD(s,-1);
+  }
+  return n;
+}
+function renderHeader(){
+  const nDone=L.filter((_,i)=>lessonComplete(i)).length;
+  document.getElementById('s-lessons').textContent=nDone+'/'+L.length;
+  document.getElementById('s-streak').textContent=streak();
+  const due=dueCards(false).length;
+  document.getElementById('s-due').textContent=due;
+  const td=document.getElementById('t-due'); td.hidden=!due; td.textContent=due;
+  // phase map
+  const tr=document.getElementById('track'); tr.innerHTML='';
+  PH.forEach(p=>{
+    const idx=L.map((l,i)=>l[0]===p.id?i:-1).filter(i=>i>=0);
+    const pct=idx.filter(lessonComplete).length/idx.length*100;
+    const seg=document.createElement('div'); seg.className='seg'; seg.style.setProperty('--c',p.color);
+    seg.style.flex=idx.length; seg.title=p.name+': '+Math.round(pct)+'%';
+    seg.innerHTML=`<i style="width:${pct}%"></i>`; tr.appendChild(seg);
+  });
+  document.getElementById('legend').innerHTML=PH.map(p=>`<span style="--c:${p.color}">${p.name}</span>`).join('');
+  // Salesforce banner
+  const b=document.getElementById('banner');
+  const applied=done[lessonDate[1]]&&done[lessonDate[1]].build;
+  if(TODAY<=DEADLINE && !applied){
+    const days=Math.round((parse(DEADLINE)-parse(TODAY))/864e5);
+    b.hidden=false;
+    b.innerHTML=`<span>Next deadline: Salesforce AI Labs Rotational Fellowship closes <b>Nov 6</b>: <b>${days} day${days===1?'':'s'}</b> left.</span><button class="btn" id="go-apply">Open the application day</button>`;
+    document.getElementById('go-apply').onclick=()=>{cur=lessonDate[1]; show('today');};
+  } else b.hidden=true;
+}
+
+// ---------- today ----------
+let cur=byDate[TODAY]?TODAY:(TODAY<START?START:LAST);
+const TYPE={v:'Watch',i:'Interactive',r:'Read',p:'Practice'};
+function resLinks(keys,color){
+  return keys.map(k=>{const r=RES[k];return `<a href="${r[1]}" target="_blank" rel="noopener" style="--c:${color}"><small>${TYPE[r[2]]}</small>${r[0]}</a>`}).join('');
+}
+function checkBox(key,label){
+  const d=done[cur]||{};
+  return `<input type="checkbox" class="check" data-k="${key}" aria-label="${label} done" ${d[key]?'checked':''}>`;
+}
+function renderToday(){
+  const v=document.getElementById('v-today');
+  const day=byDate[cur];
+  const nav=`<div class="daynav"><button class="btn" id="prev" ${cur<=START?'disabled':''}>← ${fmt(addD(cur,-1),{month:'short',day:'numeric'})}</button>
+    ${cur!==TODAY&&byDate[TODAY]?'<button class="btn primary" id="gotoday">Today</button>':''}
+    <button class="btn" id="next" ${cur>=LAST?'disabled':''}>${fmt(addD(cur,1),{month:'short',day:'numeric'})} →</button></div>`;
+  let body='';
+  const dueN=dueCards(false).length;
+  if(day.kind==='lesson'){
+    const l=L[day.idx], p=phase(l[0]), d=done[cur]||{};
+    const all=d.learn&&d.build&&d.cards;
+    body=`<article class="day" style="--c:${p.color}">
+      <div class="day-head">
+        <div class="chips"><span class="chip ph">${p.name}</span><span class="chip">Lesson ${day.idx+1} of ${L.length}</span><span class="chip">${fmt(cur,{weekday:'long',month:'short',day:'numeric'})}</span></div>
+        <h2>${l[1]}</h2>
+        <p class="note">Phase goal: ${p.goal}</p>
+      </div>
+      <div class="blocks">
+        <section class="block learn ${d.learn?'done':''}">
+          <div class="bhead">${checkBox('learn','Learn')}<h3>Learn</h3><span class="dur">3–4 h</span></div>
+          <ul class="obj">${l[2].map(o=>`<li>${o}</li>`).join('')}</ul>
+          <div class="res">${resLinks(l[3],p.color)}</div>
+          <p class="note">Watch or play with the visual first, then read, then type out every example yourself.</p>
+        </section>
+        <section class="block ${d.build?'done':''}">
+          <div class="bhead">${checkBox('build','Build')}<h3>Build</h3><span class="dur">1–2 h</span></div>
+          <div class="build">${l[4]}</div>
+        </section>
+        <section class="block ${d.cards?'done':''}">
+          <div class="bhead">${checkBox('cards','Flashcards')}<h3>Flashcards</h3><span class="dur">15–20 min</span></div>
+          <p>${l[5].length} new card${l[5].length>1?'s':''} today · ${dueN} due in total</p>
+          <div><button class="btn primary" id="study">Review cards</button></div>
+        </section>
+      </div>
+      ${all?'<div class="allday">Day complete. Nice work.</div>':''}
+    </article>`;
+  } else if(day.kind==='review'){
+    const week=[]; for(let k=1;k<=6;k++){const x=byDate[addD(cur,-k)]; if(x&&x.kind==='lesson') week.unshift(x);}
+    const d=done[cur]||{};
+    body=`<article class="day" style="--c:var(--ink-3)">
+      <div class="day-head"><div class="chips"><span class="chip">Sunday review</span><span class="chip">${fmt(cur,{weekday:'long',month:'short',day:'numeric'})}</span></div>
+      <h2>Review and rest</h2><p class="note">About an hour. Keep it light.</p></div>
+      <div class="blocks">
+        <section class="block learn ${d.learn?'done':''}"><div class="bhead">${checkBox('learn','Recap')}<h3>Recap the week</h3><span class="dur">30 min</span></div>
+          <ul class="obj">${week.length?week.map(x=>`<li>${L[x.idx][1]}</li>`).join(''):'<li>No lessons this week.</li>'}</ul>
+          <p class="note">Explain each topic out loud in two minutes, as if to a customer. Redo one build task you rushed.</p></section>
+        <section class="block ${d.build?'done':''}"><div class="bhead">${checkBox('build','Commit')}<h3>Commit and write up</h3><span class="dur">20 min</span></div>
+          <div class="build">Push the week's code. Add 3 lines to your learning log: what clicked, what didn't, what's next.</div></section>
+        <section class="block ${d.cards?'done':''}"><div class="bhead">${checkBox('cards','Flashcards')}<h3>Flashcards</h3><span class="dur">20 min</span></div>
+          <p>${dueN} due</p><div><button class="btn primary" id="study">Review cards</button></div></section>
+      </div></article>`;
+  } else {
+    const trail=day.kind==='trail', d=done[cur]||{};
+    body=`<article class="day" style="--c:${trail?'#1E8A6E':'#C98A00'}">
+      <div class="day-head"><div class="chips"><span class="chip">${trail?'Trail day':'Travel'}</span><span class="chip">${fmt(cur,{weekday:'long',month:'short',day:'numeric'})}</span></div>
+      <h2>${day.label}</h2><p class="note">${trail?'No lessons. The plan picks up where you left off after the block.':'No lessons while you travel. Ten minutes of cards on your phone keeps the streak.'}</p></div>
+      <div class="blocks"><section class="block ${d.cards?'done':''}"><div class="bhead">${checkBox('cards','Flashcards')}<h3>Optional: flashcards</h3><span class="dur">10 min</span></div>
+      <p>${dueN} due</p><div><button class="btn primary" id="study">Review cards</button></div></section></div></article>`;
+  }
+  v.innerHTML=`<div style="display:flex;flex-direction:column;gap:14px">${nav}${body}</div>`;
+  const P=document.getElementById('prev'), N=document.getElementById('next'), T=document.getElementById('gotoday'), S=document.getElementById('study');
+  if(P) P.onclick=()=>{cur=addD(cur,-1);renderToday();};
+  if(N) N.onclick=()=>{cur=addD(cur,1);renderToday();};
+  if(T) T.onclick=()=>{cur=TODAY;renderToday();};
+  if(S) S.onclick=()=>show('cards');
+  v.querySelectorAll('.check').forEach(c=>c.onchange=()=>{
+    const d=done[cur]||(done[cur]={}); d[c.dataset.k]=c.checked; save('ul-done',done); renderHeader(); renderToday();
+  });
+}
+
+// ---------- plan ----------
+function renderPlan(){
+  const v=document.getElementById('v-plan');
+  const curPh=(byDate[TODAY]&&byDate[TODAY].kind==='lesson')?L[byDate[TODAY].idx][0]:null;
+  const groups=PH.map(p=>{
+    const rows=L.map((l,i)=>[l,i]).filter(([l])=>l[0]===p.id).map(([l,i])=>{
+      const d=done[lessonDate[i]]||{}; const st=d.learn&&d.build?'full':(d.learn||d.build?'half':'');
+      return `<div class="row ${lessonDate[i]===TODAY?'today':''}" data-d="${lessonDate[i]}" style="--c:${p.color}" role="button" tabindex="0">
+        <span class="d">${fmt(lessonDate[i],{month:'short',day:'numeric'})}</span><span class="t">${l[1]}</span><span class="dot ${st}"></span></div>`;}).join('');
+    const idx=L.map((l,i)=>l[0]===p.id?i:-1).filter(i=>i>=0);
+    const n=idx.filter(lessonComplete).length;
+    const first=lessonDate[idx[0]], last=lessonDate[idx[idx.length-1]];
+    return `<details class="ph-group" style="--c:${p.color}" ${p.id===curPh||(!curPh&&p.id==='launch')?'open':''}>
+      <summary><h3>${p.name}</h3><span class="g mono">${n}/${idx.length} · ${fmt(first,{month:'short',day:'numeric'})} – ${fmt(last,{month:'short',day:'numeric'})}</span></summary>${rows}</details>`;
+  }).join('');
+  const offs=OFF.map(o=>`<div>· ${fmt(o[0],{month:'short',day:'numeric'})}${o[1]!==o[0]?' – '+fmt(o[1],{month:'short',day:'numeric'}):''}: ${o[3]}</div>`).join('');
+  v.innerHTML=`<div class="plan">
+    <p class="note">${L.length} lessons from ${fmt(START,{month:'short',day:'numeric',year:'numeric'})} to ${fmt(LAST,{month:'short',day:'numeric',year:'numeric'})}. Monday–Saturday are lesson days, Sundays are review. Tap a lesson to open it.</p>
+    ${groups}
+    <details class="ph-group" style="--c:var(--ink-3)"><summary><h3>Days off built in</h3><span class="g">${OFF.length} blocks</span></summary><div class="offs" style="padding:12px 18px">${offs}</div></details>
+  </div>`;
+  v.querySelectorAll('.row').forEach(r=>{const go=()=>{cur=r.dataset.d;show('today');}; r.onclick=go; r.onkeydown=e=>{if(e.key==='Enter')go();};});
+}
+
+// ---------- flashcards ----------
+let fPh=null, ahead=false, queue=[], flipped=false;
+function buildQueue(){queue=dueCards(ahead,fPh).sort(()=>Math.random()-.5); flipped=false;}
+function grade(g){
+  const c=queue.shift(); if(!c) return;
+  const s=srs[c.id]||{b:0};
+  if(g===0){s.b=0; s.due=TODAY; queue.push(c);}
+  else {s.b=Math.min(INTERVAL.length-1,s.b+(g===2?2:1)); s.due=addD(TODAY,INTERVAL[s.b]);}
+  srs[c.id]=s; save('ul-srs',srs);
+  cardsDone[TODAY]=(cardsDone[TODAY]||0)+1; save('ul-cardlog',cardsDone);
+  if(!queue.length){const d=done[TODAY]||(done[TODAY]={}); d.cards=true; save('ul-done',done);}
+  flipped=false; renderHeader(); renderCards();
+}
+function renderCards(){
+  const v=document.getElementById('v-cards');
+  const pool=CARDS.filter(c=>(ahead||unlocked(c))&&(!fPh||c.ph===fPh));
+  const box=[0,0,0,0,0,0,0]; pool.forEach(c=>{const s=srs[c.id]; box[s?s.b:0]++;});
+  const filt=`<div class="deckbar"><button class="fbtn" data-p="" aria-pressed="${!fPh}">All phases</button>${PH.map(p=>`<button class="fbtn" data-p="${p.id}" aria-pressed="${fPh===p.id}">${p.name}</button>`).join('')}</div>`;
+  const boxes=`<div class="boxes">${['New','1 d','3 d','1 wk','2 wk','1 mo+'].map((n,i)=>`<div class="box"><b>${i===5?box[5]+box[6]:box[i]}</b><span>${n}</span></div>`).join('')}</div>`;
+  let stage;
+  const c=queue[0];
+  if(c){
+    const p=phase(c.ph);
+    stage=`<button class="card ${flipped?'flip':''}" id="card" style="--c:${p.color}" aria-label="Flashcard, ${flipped?'showing answer':'tap to show answer'}">
+      <div class="card-in">
+        <div class="face"><div class="meta"><span>${p.name}</span><span>${queue.length} left</span></div><div class="q">${c.q}</div><div class="meta"><span>${L[c.li][1]}</span><span>Tap or space to flip</span></div></div>
+        <div class="face back"><div class="meta"><span>Answer</span><span>${queue.length} left</span></div><div class="a">${c.a}</div><div class="meta"><span>${L[c.li][1]}</span><span>1 · 2 · 3 to grade</span></div></div>
+      </div></button>
+      <div class="grade" ${flipped?'':'hidden'}><button class="again" data-g="0">Again<small>today</small></button><button class="good" data-g="1">Good<small>next box</small></button><button class="easy" data-g="2">Easy<small>skip a box</small></button></div>`;
+  } else {
+    const locked=CARDS.filter(x=>!unlocked(x)).length;
+    stage=`<div class="empty"><h3>All caught up</h3><p>${pool.length} cards unlocked so far. New cards unlock with each lesson day.</p>
+      ${!ahead&&locked?`<button class="btn" id="ahead">Study ahead (${locked} locked cards)</button>`:''}
+      ${ahead?'<button class="btn" id="behind">Back to unlocked cards only</button>':''}</div>`;
+  }
+  v.innerHTML=`<div style="display:flex;flex-direction:column;gap:16px">${filt}<div class="stage">${boxes}${stage}<p class="hint">Spaced repetition: right answers move a card to a longer interval; misses come back today.</p></div></div>`;
+  v.querySelectorAll('.fbtn').forEach(b=>b.onclick=()=>{fPh=b.dataset.p||null; buildQueue(); renderCards();});
+  const card=document.getElementById('card'); if(card) card.onclick=()=>{flipped=!flipped; renderCards();};
+  v.querySelectorAll('.grade button').forEach(b=>b.onclick=()=>grade(+b.dataset.g));
+  const A=document.getElementById('ahead'); if(A) A.onclick=()=>{ahead=true; buildQueue(); renderCards();};
+  const B=document.getElementById('behind'); if(B) B.onclick=()=>{ahead=false; buildQueue(); renderCards();};
+}
+document.addEventListener('keydown',e=>{
+  if(document.getElementById('v-cards').hidden||!queue.length) return;
+  if(e.key===' '){e.preventDefault(); flipped=!flipped; renderCards();}
+  else if(flipped&&['1','2','3'].includes(e.key)) grade(+e.key-1);
+});
+
+// ---------- tabs ----------
+function show(t){
+  ['today','plan','cards'].forEach(x=>{
+    document.getElementById('v-'+x).hidden=x!==t;
+    document.getElementById('t-'+x).setAttribute('aria-selected',x===t);
+  });
+  if(t==='today') renderToday(); if(t==='plan') renderPlan(); if(t==='cards'){buildQueue(); renderCards();}
+  try{localStorage.setItem('ul-tab',t)}catch(e){}
+}
+['today','plan','cards'].forEach(x=>document.getElementById('t-'+x).onclick=()=>{if(x==='today')cur=byDate[TODAY]?TODAY:cur; show(x);});
+renderHeader();
+show(location.hash==='#cards'?'cards':location.hash==='#plan'?'plan':'today');
+})();
+</script>
+</body>
+</html>
