@@ -96,6 +96,14 @@ ul.obj li{margin:2px 0}
 .res a{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:7px 11px;font-size:.88rem;background:var(--bg)}
 .res a:hover{border-color:var(--c,var(--accent))}
 .res a small{font:600 .62rem var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.exact{background:var(--bg);border-radius:10px;padding:12px 14px}
+.exact ol{margin:8px 0 0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px}
+.exact a{color:var(--ink);text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
+.exact a:hover{text-decoration-color:var(--c,var(--accent))}
+.donewhen{margin:10px 0 8px;font-size:.9rem;color:var(--ink-2)}
+.donewhen b{color:var(--ok)}
+.exact code{font-family:var(--f-mono);font-size:.85em}
+.mins{font:600 .68rem var(--f-mono);color:var(--ink-3);white-space:nowrap}
 .build{background:var(--bg);border-radius:10px;padding:12px 14px;color:var(--ink)}
 .allday{margin:0 20px 16px;padding:10px 14px;border-radius:10px;background:var(--ok-tint);color:var(--ok);font-weight:600;font-size:.9rem}
 .note{color:var(--ink-3);font-size:.85rem}
@@ -141,7 +149,6 @@ ul.obj li{margin:2px 0}
 .box span{font:600 .58rem var(--f-mono);color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em}
 .hint{font-size:.78rem;color:var(--ink-3)}
 footer{color:var(--ink-3);font-size:.8rem;border-top:1px solid var(--line);padding-top:14px}
-@media (min-width:760px){.blocks{grid-template-columns:1.4fr 1fr}.block.learn{grid-row:span 3;border-right:1px solid var(--line)}}
 @media (max-width:520px){.row{grid-template-columns:70px 1fr auto;padding:9px 12px}.grade button{min-width:90px;padding:10px 12px}}
 @media (prefers-reduced-motion:reduce){.card-in{transition:none}}
 </style>
@@ -309,12 +316,14 @@ function renderToday(){
         <section class="block learn ${d.learn?'done':''}">
           <div class="bhead">${checkBox('learn','Learn')}<h3>Learn</h3><span class="dur">3–4 h</span></div>
           <ul class="obj">${l[2].map(o=>`<li>${o}</li>`).join('')}</ul>
+          ${(window.DETAIL&&window.DETAIL[day.idx])?`<div class="exact"><div class="eyebrow">Exactly what to do today</div><ol>${window.DETAIL[day.idx].map(x=>`<li><a href="${x[1]}" target="_blank" rel="noopener">${x[0]}</a> <span class="mins">${x[2]} min</span></li>`).join('')}</ol></div>`:''}
           <div class="res">${resLinks(l[3],p.color)}</div>
           <p class="note">Watch or play with the visual first, then read, then type out every example yourself.</p>
         </section>
         <section class="block ${d.build?'done':''}">
           <div class="bhead">${checkBox('build','Build')}<h3>Build</h3><span class="dur">1–2 h</span></div>
           <div class="build">${l[4]}</div>
+          ${(window.LAB&&window.LAB[day.idx])?(()=>{const lb=window.LAB[day.idx]; return `<div class="exact"><div class="eyebrow">Lab steps</div><ol>${lb.steps.map(x=>`<li>${x}</li>`).join('')}</ol><p class="donewhen"><b>Done when:</b> ${lb.done}</p><div class="res">${lb.links.map(k=>`<a href="${k[1]}" target="_blank" rel="noopener">${k[0]}</a>`).join('')}</div></div>`})():''}
         </section>
         ${(()=>{const e=window.eduFor(day.idx); return e?`<section class="block ${d.edu?'done':''}">
           <div class="bhead">${checkBox('edu','Educative')}<h3>Educative</h3><span class="dur">1.5 h</span></div>
