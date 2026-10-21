@@ -385,3 +385,26 @@ window.LESSONS = [
 ["cap","Retro and next 90 days",["What stuck, what didn't","Plan the next quarter"],["tih"],"Write a retro and pick 3 deeper topics for the next 90 days.",[
  ["Best predictor of learning","Consistent daily practice plus spaced review, not cramming."]]]
 ];
+
+// Educative track: 1.5 h a day on lesson days. Lesson indexes are 0-based; each segment spreads its units across its days.
+window.EDU = [
+  {course:"Grokking System Design Fundamentals", url:"https://www.educative.io/courses/grokking-system-design-fundamentals", from:0, to:3,
+   units:["Finish Distributed System Fundamentals, then Communication in Distributed Systems","Storage and Data Management","Security in System Design, then Trade-Offs and Real-World Design Principles","Wrapping Up, then redo the 4 quizzes"]},
+  {course:"Learn Python 3 from Scratch", url:"https://www.educative.io/courses/learn-python-3-from-scratch", from:4, to:7,
+   units:["Introduction to Python and Programming Concepts (lessons 1–3)","Introduction to Python and Programming Concepts (lessons 4–5) + quiz","User-Defined Functions and Data Types","Program Structures and Calculating Game"]},
+  {course:"Grokking the Coding Interview Patterns in Python", url:"https://www.educative.io/courses/grokking-coding-interview-in-python", from:8, to:64,
+   units:["Two Pointers","Fast and Slow Pointers","Sliding Window","Intervals","In-Place Manipulation of a Linked List","Two Heaps","K-way Merge","Top K Elements","Modified Binary Search","Subsets","Greedy Techniques","Backtracking","Dynamic Programming","Cyclic Sort","Topological Sort","Sort and Search","Matrices","Stacks","Graphs","Tree Depth-First Search","Tree Breadth-First Search","Trie","Hash Maps","Knowing What to Track","Union Find","Custom Data Structures","Bitwise Manipulation","Math and Geometry","Challenge Yourself"]},
+  {course:"Grokking the Modern System Design Interview", url:"https://www.educative.io/courses/grokking-the-system-design-interview", from:65, to:81,
+   units:["Introduction","System Design Interviews","Preliminary System Design Concepts","Non-Functional System Characteristics","Back-of-the-Envelope Calculations","Building Blocks","Domain Name System","Load Balancers","Databases","Key-Value Store","Content Delivery Network (CDN)","Sequencer","Distributed Monitoring","Monitor Server-Side Errors","Monitor Client-Side Errors","Distributed Cache","Distributed Messaging Queue","Pub-Sub","Rate Limiter","Blob Store","Distributed Search","Distributed Logging","Distributed Task Scheduler","Sharded Counters","Concluding the Building Blocks Discussion","Design YouTube","Design Quora","Design Google Maps","Design a Proximity Service/Yelp","Design Uber","Design Twitter","Design Newsfeed System","Design Instagram","Design a URL Shortening Service","Design a Web Crawler","Design WhatsApp","Design Typeahead Suggestion","Design Google Docs","Design a Deployment System","Design a Payment System","Design a LeetCode System","System Design Shift in AI","Design a ChatGPT System","Design a Data Infrastructure System","LLM-Powered Customer Support Bot","AI-Powered Code Assistant","Lessons from System Failures","Concluding Remarks"]},
+  {course:"Grokking the Machine Learning Interview", url:"https://www.educative.io/courses/grokking-the-machine-learning-interview", from:82, to:91,
+   units:["Introduction","Practical ML Techniques/Concepts","Search Ranking","Feed Based System","Recommendation System","Self-Driving Car: Image Segmentation","Entity Linking System","Ad Prediction System","Fraud Detection System","Hate Speech Detection + Dynamic Pricing Engine"]},
+  {course:"Catch-up", url:"https://www.educative.io/learn", from:92, to:98,
+   units:["Finish anything left in the Coding Patterns course","Finish anything left in the Coding Patterns course","Finish anything left in Modern System Design","Finish anything left in Modern System Design","Finish anything left in the ML Interview course","Redo 5 Coding Patterns problems you missed","Pick your next course (Low Level Design is a good next one)"]}
+];
+window.eduFor = function(i){
+  const s = window.EDU.find(e => i >= e.from && i <= e.to); if (!s) return null;
+  const days = s.to - s.from + 1, k = i - s.from, n = s.units.length;
+  const a = Math.floor(k * n / days), b = Math.max(a, Math.floor((k + 1) * n / days) - 1);
+  const units = s.units.slice(a, b + 1);
+  return {course:s.course, url:s.url, units: units.length ? units : [s.units[Math.min(a, n - 1)] + " (continue)"], day:k + 1, days};
+};
