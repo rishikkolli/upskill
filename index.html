@@ -141,7 +141,7 @@ ul.obj li{margin:2px 0}
 .box span{font:600 .58rem var(--f-mono);color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em}
 .hint{font-size:.78rem;color:var(--ink-3)}
 footer{color:var(--ink-3);font-size:.8rem;border-top:1px solid var(--line);padding-top:14px}
-@media (min-width:760px){.blocks{grid-template-columns:1.4fr 1fr}.block.learn{grid-row:span 2;border-right:1px solid var(--line)}}
+@media (min-width:760px){.blocks{grid-template-columns:1.4fr 1fr}.block.learn{grid-row:span 3;border-right:1px solid var(--line)}}
 @media (max-width:520px){.row{grid-template-columns:70px 1fr auto;padding:9px 12px}.grade button{min-width:90px;padding:10px 12px}}
 @media (prefers-reduced-motion:reduce){.card-in{transition:none}}
 </style>
@@ -152,7 +152,7 @@ footer{color:var(--ink-3);font-size:.8rem;border-top:1px solid var(--line);paddi
     <div>
       <div class="eyebrow">Software · Data · AI engineering</div>
       <h1>Upskill Lab</h1>
-      <p class="sub">Every day: 3–4 hours learning, 1–2 hours building, then flashcards. Visual resources first.</p>
+      <p class="sub">Every day: 3–4 hours learning, 1–2 hours building, 1.5 hours on Educative, then flashcards. Visual resources first.</p>
     </div>
     <div class="stats">
       <div class="stat"><b id="s-streak">0</b><span>Day streak</span></div>
@@ -298,7 +298,7 @@ function renderToday(){
   const dueN=dueCards(false).length;
   if(day.kind==='lesson'){
     const l=L[day.idx], p=phase(l[0]), d=done[cur]||{};
-    const all=d.learn&&d.build&&d.cards;
+    const all=d.learn&&d.build&&d.cards&&(d.edu||!window.eduFor(day.idx));
     body=`<article class="day" style="--c:${p.color}">
       <div class="day-head">
         <div class="chips"><span class="chip ph">${p.name}</span><span class="chip">Lesson ${day.idx+1} of ${L.length}</span><span class="chip">${fmt(cur,{weekday:'long',month:'short',day:'numeric'})}</span></div>
@@ -316,6 +316,11 @@ function renderToday(){
           <div class="bhead">${checkBox('build','Build')}<h3>Build</h3><span class="dur">1–2 h</span></div>
           <div class="build">${l[4]}</div>
         </section>
+        ${(()=>{const e=window.eduFor(day.idx); return e?`<section class="block ${d.edu?'done':''}">
+          <div class="bhead">${checkBox('edu','Educative')}<h3>Educative</h3><span class="dur">1.5 h</span></div>
+          <p><a href="${e.url}" target="_blank" rel="noopener">${e.course}</a> <span class="note">· day ${e.day} of ${e.days}</span></p>
+          <ul class="obj">${e.units.map(u=>`<li>${u}</li>`).join('')}</ul>
+        </section>`:''})()}
         <section class="block ${d.cards?'done':''}">
           <div class="bhead">${checkBox('cards','Flashcards')}<h3>Flashcards</h3><span class="dur">15–20 min</span></div>
           <p>${l[5].length} new card${l[5].length>1?'s':''} today · ${dueN} due in total</p>
@@ -377,6 +382,7 @@ function renderPlan(){
   v.innerHTML=`<div class="plan">
     <p class="note">${L.length} lessons from ${fmt(START,{month:'short',day:'numeric',year:'numeric'})} to ${fmt(LAST,{month:'short',day:'numeric',year:'numeric'})}. Monday–Saturday are lesson days, Sundays are review. Tap a lesson to open it.</p>
     ${groups}
+    <details class="ph-group" style="--c:#2E8B8B"><summary><h3>Educative track · 1.5 h a day</h3><span class="g">${window.EDU.length} blocks</span></summary><div class="offs" style="padding:12px 18px">${window.EDU.map(e=>`<div>· ${fmt(lessonDate[e.from],{month:'short',day:'numeric'})} – ${fmt(lessonDate[e.to],{month:'short',day:'numeric'})}: ${e.url.includes('/courses/')?`<a href="${e.url}" target="_blank" rel="noopener">${e.course}</a>`:e.course}</div>`).join('')}</div></details>
     <details class="ph-group" style="--c:var(--ink-3)"><summary><h3>Days off built in</h3><span class="g">${OFF.length} blocks</span></summary><div class="offs" style="padding:12px 18px">${offs}</div></details>
   </div>`;
   v.querySelectorAll('.row').forEach(r=>{const go=()=>{cur=r.dataset.d;show('today');}; r.onclick=go; r.onkeydown=e=>{if(e.key==='Enter')go();};});
