@@ -408,3 +408,157 @@ window.eduFor = function(i){
   const units = s.units.slice(a, b + 1);
   return {course:s.course, url:s.url, units: units.length ? units : [s.units[Math.min(a, n - 1)] + " (continue)"], day:k + 1, days};
 };
+
+// Exact assignments for the first two weeks (lesson index → [what, link, minutes]).
+(function(){
+  const T = "https://docs.python.org/3/tutorial/", MS = "https://missing.csail.mit.edu/2026/", CS = "https://cs50.harvard.edu/python/weeks/", CY = "https://www.youtube.com/@coreyms/search?query=";
+  window.DETAIL = {
+    0:[["Watch Missing Semester 2026, lecture 1: Course Overview + Introduction to the Shell", MS+"course-shell/", 60],
+       ["Watch Missing Semester 2026, lecture 5: Version Control and Git (first half: data model, basic commands)", MS+"version-control/", 45],
+       ["Read Python tutorial §1–2: Whetting Your Appetite, Using the Interpreter", T+"appetite.html", 20],
+       ["Do: install Python 3.12, VS Code + Python extension, git; set git config user.name/email", "https://code.visualstudio.com/docs/python/python-tutorial", 45]],
+    1:[["Read Tech Interview Handbook: Resume guide (all sections)", "https://www.techinterviewhandbook.org/resume/", 45],
+       ["Read Tech Interview Handbook: Behavioral interview guide", "https://www.techinterviewhandbook.org/behavioral-interview/", 30],
+       ["Pick 3 questions from the behavioral question list and draft STAR answers", "https://www.techinterviewhandbook.org/behavioral-interview-questions/", 60],
+       ["Re-read the Salesforce AI Labs posting and highlight every requirement you can prove", "https://careers.salesforce.com/", 20]],
+    2:[["Read Tech Interview Handbook: Resume guide, 'projects' section again with your 3 repos open", "https://www.techinterviewhandbook.org/resume/", 20],
+       ["Watch Missing Semester 2026, lecture 5: Version Control and Git (second half: branches, remotes)", MS+"version-control/", 40],
+       ["Do: write 3 READMEs (what, why, screenshot/GIF, how to run) and pin the repos on your profile", "https://github.com/rishikkolli", 120]],
+    3:[["Watch CS50P Week 0: Functions, Variables (full lecture)", CS+"0/", 90],
+       ["Read Python tutorial §3: An Informal Introduction (numbers, text, lists)", T+"introduction.html", 40],
+       ["Step through 5 of your own snippets in Python Tutor (watch the variables change)", "https://pythontutor.com/visualize.html", 30],
+       ["Do CS50P Problem Set 0 (at least 3 of the problems)", CS+"0/", 60]],
+    4:[["Watch Corey Schafer: Python Tutorial for Beginners 2: Strings", CY+"beginners+strings", 25],
+       ["Read Python tutorial §7.1: Fancier Output Formatting (f-strings)", T+"inputoutput.html", 30],
+       ["Skim the string methods reference: split, join, strip, replace, startswith, find", "https://docs.python.org/3/library/stdtypes.html#string-methods", 20],
+       ["Do: 10 string exercises in Python Tutor or a REPL (slice, reverse, format paces)", "https://pythontutor.com/visualize.html", 60]],
+    5:[["Watch CS50P Week 1: Conditionals", CS+"1/", 60],
+       ["Watch CS50P Week 2: Loops", CS+"2/", 60],
+       ["Read Python tutorial §4.1–4.5: if, for, range, break/continue, else on loops", T+"controlflow.html", 30],
+       ["Do 2 problems from CS50P Problem Set 1 and 2 from Problem Set 2", CS+"2/", 60]],
+    6:[["Read Python tutorial §5.1–5.3: lists, list comprehensions, del, tuples", T+"datastructures.html", 40],
+       ["Watch Corey Schafer: Lists, Tuples, and Sets", CY+"beginners+lists+tuples+sets", 30],
+       ["Watch Corey Schafer: List Comprehensions", CY+"list+comprehensions", 20],
+       ["In Python Tutor, see why b = a then a.append(1) changes b (aliasing)", "https://pythontutor.com/visualize.html", 20]],
+    7:[["Read Python tutorial §5.4–5.6: sets, dictionaries, looping techniques", T+"datastructures.html#sets", 35],
+       ["Read collections docs: Counter and defaultdict sections only", "https://docs.python.org/3/library/collections.html#counter-objects", 25],
+       ["Watch Corey Schafer: Dictionaries", CY+"beginners+dictionaries", 25],
+       ["Do: word-count a job posting with Counter; skill gap with set difference", "https://pythontutor.com/visualize.html", 60]],
+    8:[["Read Python tutorial §4.7–4.9: defining functions, default/keyword args, *args, **kwargs, docstrings", T+"controlflow.html#defining-functions", 45],
+       ["Read Python tutorial §9.2: Python Scopes and Namespaces", T+"classes.html#python-scopes-and-namespaces", 25],
+       ["Watch Corey Schafer: Functions", CY+"beginners+functions", 25],
+       ["Do: refactor your pace calculator into functions with docstrings", "https://pythontutor.com/visualize.html", 60]],
+    9:[["Watch CS50P Week 3: Exceptions", CS+"3/", 50],
+       ["Watch CS50P Week 6: File I/O", CS+"6/", 60],
+       ["Read Python tutorial §7.2 (reading and writing files) and §8 (errors and exceptions)", T+"errors.html", 40],
+       ["Do 2 problems from CS50P Problem Set 6", CS+"6/", 60]],
+    10:[["Watch CS50P Week 4: Libraries", CS+"4/", 60],
+        ["Read Python tutorial §6: Modules (including packages and __name__)", T+"modules.html", 40],
+        ["Read Python tutorial §12: Virtual Environments and Packages", T+"venv.html", 20],
+        ["Do: make trail_log a package with a venv and requirements.txt", T+"venv.html", 60]],
+    11:[["Watch CS50P Week 8: Object-Oriented Programming (first half, through properties)", CS+"8/", 75],
+        ["Read Python tutorial §9.3: A First Look at Classes", T+"classes.html#a-first-look-at-classes", 30],
+        ["Do: Run and Week classes with total_miles() and longest()", "https://pythontutor.com/visualize.html", 60]]
+  };
+})();
+
+// Step-by-step labs for the first two weeks. Steps are plain text; links are [label, url].
+(function(){
+  const P = "https://cs50.harvard.edu/python/psets/", MS = "https://missing.csail.mit.edu/2026/";
+  window.LAB = {
+    0:{steps:[
+      "Install Python 3.12 from python.org, then check it: python3 --version",
+      "Install VS Code and its Python extension. Follow the VS Code Python tutorial up to \"Run Python code\".",
+      "Install git, then run: git config --global user.name \"Rishik Kolli\", git config --global user.email you@example.com (use your own), git config --global init.defaultBranch main",
+      "On GitHub, create a public repo upskill-lab with a README and the Python .gitignore. Clone it.",
+      "Create folders: 00-launch, 01-python, 02-dsa, 03-swe, 04-de, 05-ml, 06-ai, notes",
+      "Write 01-python/hello.py that prints your name and today's planned miles. Run it, commit \"Add hello\", push.",
+      "In a terminal, do Missing Semester shell exercises 1–6. Paste each command and what it did into notes/shell.md.",
+      "Do Version Control exercise 5: add a git graph alias (git log --all --graph --decorate --oneline) and try it."],
+      done:"upskill-lab is on GitHub with the folders and hello.py, and git graph prints your history.",
+      links:[["Python downloads","https://www.python.org/downloads/"],["VS Code Python tutorial","https://code.visualstudio.com/docs/python/python-tutorial"],["New GitHub repo","https://github.com/new"],["Shell exercises",MS+"course-shell/"],["Git exercises",MS+"version-control/"]]},
+    1:{steps:[
+      "Create 00-launch/targets.md with columns: company, program, link, deadline, status, referral.",
+      "Add 10 rows: Salesforce AI Labs first, then similar programs. Search LinkedIn Jobs and your job board for: \"AI rotational program\", \"AI residency\", \"forward deployed engineer new grad\", \"new grad AI engineer\", \"applied AI engineer\".",
+      "Copy your resume. Rewrite the top 3 bullets of each role as action + what you built + impact + tech (Tech Interview Handbook formula). Lead CommonSpirit with the BigQuery/Looker pipelines at 716-facility scale.",
+      "Write 3 STAR stories (200 words max each) in 00-launch/stories.md: a shipped project, a hard bug, explaining tech to a non-technical stakeholder.",
+      "Submit Salesforce AI Labs. Log the date and status in targets.md, then commit."],
+      done:"Salesforce AI Labs submitted, 10 targets tracked with deadlines, 3 stories written.",
+      links:[["Resume guide","https://www.techinterviewhandbook.org/resume/"],["Behavioral questions","https://www.techinterviewhandbook.org/behavioral-interview-questions/"],["LinkedIn Jobs","https://www.linkedin.com/jobs/"]]},
+    2:{steps:[
+      "Pick 3 repos to pin: your portfolio site, the job board, and your best NYU AI project. Keep basecamp off; it's meant to stay hidden.",
+      "Give each a README with: a one-line pitch, a screenshot or GIF, 3 feature bullets, the tech stack, how to run it, and what you learned.",
+      "Record a GIF of 10 seconds or less (Kap on Mac, ScreenToGif on Windows). Save it as docs/demo.gif and embed it at the top of the README.",
+      "Pin the 3 repos: your GitHub profile → Customize your pins.",
+      "Create a profile README (a repo named rishikkolli) with a 3-line intro and links to your site and LinkedIn."],
+      done:"Your GitHub profile shows a profile README and 3 pinned repos, each with a visual.",
+      links:[["Your GitHub profile","https://github.com/rishikkolli"],["Kap (Mac)","https://getkap.co/"],["ScreenToGif (Windows)","https://www.screentogif.com/"]]},
+    3:{steps:[
+      "Do CS50P Problem Set 0 in VS Code under 01-python/ps0/: Indoor Voice, Playback Speed, Making Faces, Einstein, Tip Calculator.",
+      "Write 01-python/pace.py: ask for miles (float) and time as hh:mm:ss or mm:ss, convert to seconds, and print pace per mile and per km. Use // and %.",
+      "Test it: 6.2 mi in 52:10 should print about 8:25 /mi (3130 s ÷ 6.2 = 504.8 s).",
+      "Paste pace.py into Python Tutor and step through it. Watch each variable change.",
+      "Commit \"PS0 + pace calculator\" and push."],
+      done:"All 5 PS0 problems run, and pace.py gives about 8:25 /mi for 6.2 mi in 52:10.",
+      links:[["Indoor Voice",P+"0/indoor/"],["Making Faces",P+"0/faces/"],["Tip Calculator",P+"0/tip/"],["Problem Set 0",P+"0/"],["Python Tutor","https://pythontutor.com/visualize.html"]]},
+    4:{steps:[
+      "Write 01-python/parse_run.py. Turn \"2026-10-21, 6.2 mi, 52:10\" into date, miles and seconds using split(','), strip() and replace(), then print f\"{date}: {miles:.1f} mi @ {pace} /mi\".",
+      "Make it handle 3 messier inputs: \"6.2mi\", \" 6.2 MI \" and an hour-long time like \"1:05:10\".",
+      "Do 10 string drills in the REPL: reverse a string, title-case it, count vowels, check a palindrome, right-align a number with f\"{x:>8.2f}\".",
+      "Commit and push."],
+      done:"parse_run.py handles all 4 input formats without crashing.",
+      links:[["String methods","https://docs.python.org/3/library/stdtypes.html#string-methods"],["f-string spec","https://docs.python.org/3/library/string.html#format-specification-mini-language"]]},
+    5:{steps:[
+      "CS50P Problem Set 1: Deep Thought, Home Federal Savings Bank, Meal Time.",
+      "CS50P Problem Set 2: camelCase, Vanity Plates.",
+      "Write FizzBuzz from 1 to 100 three ways: if/elif, string building, and a dict of divisors.",
+      "Write 01-python/week.py with your real week [6, 8, 6, 8, 3, 12, 5]. Use zip with day names and enumerate. Flag days over 10 mi as LONG and print the total and average.",
+      "Commit and push."],
+      done:"week.py prints 48 mi total, 6.9 average, and flags Saturday as LONG.",
+      links:[["Deep Thought",P+"1/deep/"],["Bank",P+"1/bank/"],["Meal Time",P+"1/meal/"],["camelCase",P+"2/camel/"],["Vanity Plates",P+"2/plates/"]]},
+    6:{steps:[
+      "In 01-python/runs_data.py, generate 30 days of runs with random.seed(42) and random.uniform(3, 13) miles, as a list of dicts {date, miles, seconds}.",
+      "Use comprehensions to get: runs over 10 mi, total miles, and the 3 fastest paces (sorted(..., key=...)[:3]).",
+      "Convert the runs to tuples and loop with unpacking: for date, miles, secs in runs:",
+      "In Python Tutor, run a = [1, 2]; b = a; a.append(3); c = a[:] and note which lists change.",
+      "CS50P Problem Set 2: Coke Machine and Just setting up my twttr. Commit and push."],
+      done:"runs_data.py prints long runs, total miles and the top 3 paces from one list.",
+      links:[["Coke Machine",P+"2/coke/"],["twttr",P+"2/twttr/"],["Python Tutor","https://pythontutor.com/visualize.html"]]},
+    7:{steps:[
+      "Save the Salesforce AI Labs posting text as 01-python/posting.txt.",
+      "Write skills.py: lowercase the text, strip punctuation, drop a set of stopwords, and print Counter(words).most_common(20).",
+      "Make a set of your resume skills and a set of the posting's skills (python, sql, spark, mlops, gcp, aws, agents...). Print the intersection and the gap (posting − yours).",
+      "Group your 30 runs by ISO week with defaultdict(list) using date.isocalendar().week, then print miles per week.",
+      "CS50P: Nutrition Facts (Problem Set 2) and Grocery List (Problem Set 3). Commit and push."],
+      done:"You have a printed skill-gap list. Add its top 3 gaps to targets.md as things to learn.",
+      links:[["Counter","https://docs.python.org/3/library/collections.html#counter-objects"],["Nutrition Facts",P+"2/nutrition/"],["Grocery List",P+"3/grocery/"]]},
+    8:{steps:[
+      "Create the package folder trail_log/ with core.py containing parse_time(s) -> int, pace(miles, secs) -> int, format_pace(sec_per_mile) -> str and parse_line(line) -> dict. Each gets type hints and a docstring.",
+      "Add an if __name__ == \"__main__\": demo that parses 3 lines.",
+      "Reproduce the mutable-default bug: def add_run(run, log=[]), called twice. Then fix it with log=None.",
+      "CS50P Problem Set 1: File Extensions and Math Interpreter. Commit and push."],
+      done:"python trail_log/core.py prints 3 parsed runs, and the bug demo shows the shared list.",
+      links:[["File Extensions",P+"1/extensions/"],["Math Interpreter",P+"1/interpreter/"],["Defining functions","https://docs.python.org/3/tutorial/controlflow.html#defining-functions"]]},
+    9:{steps:[
+      "Write trail_log/storage.py with save_csv / load_csv (csv.DictWriter and DictReader) and save_json / load_json.",
+      "Create sample.csv with 2 malformed lines. load_csv should skip them with try/except ValueError and print \"skipped line N: ...\".",
+      "CS50P Problem Set 3: Fuel Gauge and Outdated.",
+      "CS50P Problem Set 6: Lines of Code and Scourgify. Commit and push."],
+      done:"Loading sample.csv returns the good runs and reports exactly 2 skipped lines.",
+      links:[["Fuel Gauge",P+"3/fuel/"],["Outdated",P+"3/outdated/"],["Lines of Code",P+"6/lines/"],["Scourgify",P+"6/scourgify/"],["csv module","https://docs.python.org/3/library/csv.html"]]},
+    10:{steps:[
+      "In upskill-lab: python3 -m venv .venv, activate it, pip install rich, pip freeze > requirements.txt. Add .venv/ to .gitignore.",
+      "Finish the package: trail_log/__init__.py, core.py, storage.py and cli.py.",
+      "Use argparse subcommands: python -m trail_log.cli add \"2026-11-02, 6 mi, 50:30\", plus week (a rich table of this week) and longest.",
+      "CS50P Problem Set 4: Guessing Game and Little Professor. Commit and push."],
+      done:"From a fresh clone, pip install -r requirements.txt and python -m trail_log.cli week both work.",
+      links:[["venv tutorial","https://docs.python.org/3/tutorial/venv.html"],["argparse tutorial","https://docs.python.org/3/howto/argparse.html"],["Guessing Game",P+"4/game/"],["Little Professor",P+"4/professor/"]]},
+    11:{steps:[
+      "Add classes to core.py: Run(date, miles, seconds) with pace() and __str__, and Week(runs) with add(run), total_miles() and longest().",
+      "Switch cli.py from dicts to Run and Week objects.",
+      "CS50P Problem Set 8: Cookie Jar.",
+      "Commit, then tag a release: git tag v0.1 && git push --tags."],
+      done:"trail_log v0.1 is tagged on GitHub and the CLI uses Run/Week objects.",
+      links:[["Cookie Jar",P+"8/jar/"],["Classes tutorial","https://docs.python.org/3/tutorial/classes.html#a-first-look-at-classes"]]}
+  };
+})();
