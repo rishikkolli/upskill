@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Upskill Lab</title>
-<meta name="description" content="Daily plan: 3–4 hours of learning, 1–2 hours of building, and flashcards across software, data and AI engineering.">
+<meta name="description" content="Lesson checklist: 3–4 hours of learning, 1–2 hours of building, and flashcards across software, data and AI engineering.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
-/* Layout: one column. Header with a phase map, three tabs (Today, Plan, Cards). Phase colors carry the track identity everywhere. */
+/* Layout: one column. Header with a phase map, three tabs (Checklist, Lesson, Flashcards). Phase colors carry the track identity everywhere. */
 :root{
   --bg:#F2F4F7; --paper:#FFFFFF; --ink:#121826; --ink-2:#465066; --ink-3:#7A8397; --line:#DDE2EA;
   --accent:#2F6FD0; --ok:#1E8A5A; --ok-tint:#E2F3EA; --warn:#C2410C; --warn-tint:#FDEDE4; --chip:#EEF1F6;
@@ -115,9 +115,13 @@ ul.obj li{margin:2px 0}
 .ph-group>summary::-webkit-details-marker{display:none}
 .ph-group>summary h3{flex:1}
 .ph-group>summary .g{color:var(--ink-3);font-size:.85rem}
-.row{display:grid;grid-template-columns:92px 1fr auto;gap:10px;align-items:center;padding:9px 18px;border-top:1px dashed var(--line);cursor:pointer}
+.row{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:9px 18px;border-top:1px dashed var(--line)}
+.row .t,.row .open{cursor:pointer}
+.row .open{color:var(--ink-3)}
+.row.is-done .t{color:var(--ink-3);text-decoration:line-through;text-decoration-color:var(--line)}
+.part{font:600 .62rem var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--c)}
 .row:hover{background:var(--bg)}
-.row .d{font:500 .78rem var(--f-mono);color:var(--ink-3)}
+.row .d{font:500 .78rem var(--f-mono);color:var(--ink-3);margin-right:4px}
 .row .t{min-width:0}
 .dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--line)}
 .dot.half{border-color:var(--c);background:linear-gradient(90deg,var(--c) 50%,transparent 50%)}
@@ -149,7 +153,7 @@ ul.obj li{margin:2px 0}
 .box span{font:600 .58rem var(--f-mono);color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em}
 .hint{font-size:.78rem;color:var(--ink-3)}
 footer{color:var(--ink-3);font-size:.8rem;border-top:1px solid var(--line);padding-top:14px}
-@media (max-width:520px){.row{grid-template-columns:70px 1fr auto;padding:9px 12px}.grade button{min-width:90px;padding:10px 12px}}
+@media (max-width:520px){.row{padding:9px 12px}.grade button{min-width:90px;padding:10px 12px}}
 @media (prefers-reduced-motion:reduce){.card-in{transition:none}}
 </style>
 </head>
@@ -159,11 +163,11 @@ footer{color:var(--ink-3);font-size:.8rem;border-top:1px solid var(--line);paddi
     <div>
       <div class="eyebrow">Software · Data · AI engineering</div>
       <h1>Upskill Lab</h1>
-      <p class="sub">Every day: 3–4 hours learning, 1–2 hours building, 1.5 hours on Educative, then flashcards. Visual resources first.</p>
+      <p class="sub">Each lesson: 3–4 hours learning, 1–2 hours building, 1.5 hours on Educative, then flashcards. Work down the checklist at your own pace.</p>
     </div>
     <div class="stats">
-      <div class="stat"><b id="s-streak">0</b><span>Day streak</span></div>
-      <div class="stat"><b id="s-lessons">0/0</b><span>Lessons</span></div>
+      <div class="stat"><b id="s-lessons">0/0</b><span>Lessons done</span></div>
+      <div class="stat"><b id="s-next">#1</b><span>Next up</span></div>
       <div class="stat"><b id="s-due">0</b><span>Cards due</span></div>
     </div>
   </header>
@@ -173,19 +177,17 @@ footer{color:var(--ink-3);font-size:.8rem;border-top:1px solid var(--line);paddi
     <div class="legend" id="legend"></div>
   </section>
 
-  <div class="banner" id="banner" hidden></div>
-
   <nav class="tabs" role="tablist">
-    <button class="tab" role="tab" id="t-today" aria-selected="true">Today</button>
-    <button class="tab" role="tab" id="t-plan" aria-selected="false">Plan</button>
+    <button class="tab" role="tab" id="t-plan" aria-selected="true">Checklist</button>
+    <button class="tab" role="tab" id="t-today" aria-selected="false">Lesson</button>
     <button class="tab" role="tab" id="t-cards" aria-selected="false">Flashcards<span class="n" id="t-due" hidden>0</span></button>
   </nav>
 
-  <main id="v-today"></main>
-  <main id="v-plan" hidden></main>
+  <main id="v-plan"></main>
+  <main id="v-today" hidden></main>
   <main id="v-cards" hidden></main>
 
-  <footer>Progress, checkmarks and flashcard history are saved in this browser. Rest days and trail days are built into the schedule; lessons shift around them.</footer>
+  <footer>Checkmarks and flashcard history are saved in this browser.</footer>
 </div>
 
 <script src="data.js"></script>
@@ -193,78 +195,57 @@ footer{color:var(--ink-3);font-size:.8rem;border-top:1px solid var(--line);paddi
 (function(){
 const PH=window.PHASES, L=window.LESSONS, RES=window.RES;
 const phase=id=>PH.find(p=>p.id===id);
-const START='2026-10-21';
-// Days off: AZT trail blocks and the Central America trip. Sundays are review days.
-const OFF=[
-  ['2026-11-07','2026-11-08','trail','AZT Block 1: Happy Jack → Flagstaff'],
-  ['2026-11-26','2026-11-29','trail','AZT Block 2: Thanksgiving'],
-  ['2026-12-24','2026-12-27','trail','AZT Block 3: Christmas'],
-  ['2026-12-31','2027-01-03','trail','AZT Block 4: New Year’s'],
-  ['2027-01-05','2027-01-26','travel','Central America trip'],
-  ['2027-03-13','2027-03-14','trail','AZT Block 5a'],['2027-03-27','2027-03-28','trail','AZT Block 5b'],
-  ['2027-04-10','2027-04-11','trail','AZT Block 6a'],['2027-04-24','2027-04-25','trail','AZT Block 6b'],
-  ['2027-05-01','2027-05-02','trail','AZT Block 7'],['2027-05-08','2027-05-09','trail','AZT Block 8a'],
-  ['2027-05-15','2027-05-16','trail','AZT Block 8b'],['2027-05-28','2027-05-31','trail','AZT Block 9']
-];
-const DEADLINE='2026-11-06';
 
-// ---------- dates ----------
+// ---------- dates (flashcard intervals only) ----------
 const pad=n=>String(n).padStart(2,'0');
 const isoOf=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
 const parse=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d);};
 const addD=(s,n)=>{const d=parse(s);d.setDate(d.getDate()+n);return isoOf(d);};
 const TODAY=isoOf(new Date());
-const fmt=(s,o)=>parse(s).toLocaleDateString('en-US',o||{weekday:'short',month:'short',day:'numeric'});
-const offOf=s=>OFF.find(o=>s>=o[0]&&s<=o[1]);
-
-// ---------- schedule ----------
-const DAYS=[], byDate={}, lessonDate=[];
-for(let s=START,i=0; i<L.length; s=addD(s,1)){
-  const off=offOf(s), dow=parse(s).getDay();
-  let day;
-  if(off) day={date:s,kind:off[2],label:off[3]};
-  else if(dow===0) day={date:s,kind:'review'};
-  else {day={date:s,kind:'lesson',idx:i}; lessonDate[i]=s; i++;}
-  DAYS.push(day); byDate[s]=day;
-}
-const LAST=DAYS[DAYS.length-1].date;
 
 // ---------- storage ----------
 const load=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}};
 const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
-let done=load('ul-done',{});   // {date:{learn,build,cards}}
-let srs=load('ul-srs',{});     // {cardId:{b:box,due:date}}
-let cardsDone=load('ul-cardlog',{}); // {date:count}
+let chk=load('ul-check',null);  // {lessonIndex:{learn,build,edu,cards}}
+let srs=load('ul-srs',{});      // {cardId:{b:box,due:date}}
+
+// One-time move of checkmarks saved under the old dated schedule onto lesson numbers.
+if(!chk){
+  chk={};
+  const old=load('ul-done',{});
+  if(Object.keys(old).length){
+    const OFF=[['2026-11-07','2026-11-08'],['2026-11-26','2026-11-29'],['2026-12-24','2026-12-27'],['2026-12-31','2027-01-03'],['2027-01-05','2027-01-26'],
+      ['2027-03-13','2027-03-14'],['2027-03-27','2027-03-28'],['2027-04-10','2027-04-11'],['2027-04-24','2027-04-25'],['2027-05-01','2027-05-02'],
+      ['2027-05-08','2027-05-09'],['2027-05-15','2027-05-16'],['2027-05-28','2027-05-31']];
+    for(let s='2026-10-21',i=0;i<L.length;s=addD(s,1)){
+      if(OFF.some(o=>s>=o[0]&&s<=o[1])||parse(s).getDay()===0) continue;
+      if(old[s]) chk[i]=Object.assign({},old[s]);
+      i++;
+    }
+  }
+  save('ul-check',chk);
+}
+
+// ---------- progress ----------
+const lessonComplete=i=>{const d=chk[i];return !!(d&&d.learn&&d.build);};
+const nextUp=()=>{const i=L.findIndex((_,k)=>!lessonComplete(k));return i<0?L.length-1:i;};
+const reached=()=>{let m=nextUp();Object.keys(chk).forEach(k=>{const d=chk[k];if(d&&(d.learn||d.build))m=Math.max(m,+k);});return m;};
 
 // ---------- cards ----------
 const CARDS=[]; L.forEach((l,i)=>l[5].forEach((c,j)=>CARDS.push({id:i+'.'+j,li:i,ph:l[0],q:c[0],a:c[1]})));
 const INTERVAL=[0,1,3,7,14,30,60];
-const unlocked=c=>lessonDate[c.li]<=TODAY;
+const unlocked=c=>c.li<=reached();
 const isDue=c=>{const s=srs[c.id]; return !s || s.due<=TODAY;};
 const dueCards=(all,ph)=>CARDS.filter(c=>(all||unlocked(c))&&(!ph||c.ph===ph)&&isDue(c));
 
 // ---------- header ----------
-function lessonComplete(i){const d=done[lessonDate[i]];return !!(d&&d.learn&&d.build);}
-function streak(){
-  let n=0, s=TODAY;
-  const active=d=>{const x=done[d]; return x&&(x.learn||x.build||x.cards)||(cardsDone[d]>0);};
-  if(!active(s)) s=addD(s,-1);
-  while(s>=START){
-    const day=byDate[s];
-    if(active(s)) n++;
-    else if(!(day&&(day.kind==='trail'||day.kind==='travel'))) break;
-    s=addD(s,-1);
-  }
-  return n;
-}
 function renderHeader(){
   const nDone=L.filter((_,i)=>lessonComplete(i)).length;
   document.getElementById('s-lessons').textContent=nDone+'/'+L.length;
-  document.getElementById('s-streak').textContent=streak();
+  document.getElementById('s-next').textContent=nDone===L.length?'Done':'#'+(nextUp()+1);
   const due=dueCards(false).length;
   document.getElementById('s-due').textContent=due;
   const td=document.getElementById('t-due'); td.hidden=!due; td.textContent=due;
-  // phase map
   const tr=document.getElementById('track'); tr.innerHTML='';
   PH.forEach(p=>{
     const idx=L.map((l,i)=>l[0]===p.id?i:-1).filter(i=>i>=0);
@@ -274,41 +255,30 @@ function renderHeader(){
     seg.innerHTML=`<i style="width:${pct}%"></i>`; tr.appendChild(seg);
   });
   document.getElementById('legend').innerHTML=PH.map(p=>`<span style="--c:${p.color}">${p.name}</span>`).join('');
-  // Salesforce banner
-  const b=document.getElementById('banner');
-  const applied=done[lessonDate[1]]&&done[lessonDate[1]].build;
-  if(TODAY<=DEADLINE && !applied){
-    const days=Math.round((parse(DEADLINE)-parse(TODAY))/864e5);
-    b.hidden=false;
-    b.innerHTML=`<span>Next deadline: Salesforce AI Labs Rotational Fellowship closes <b>Nov 6</b>: <b>${days} day${days===1?'':'s'}</b> left.</span><button class="btn" id="go-apply">Open the application day</button>`;
-    document.getElementById('go-apply').onclick=()=>{cur=lessonDate[1]; show('today');};
-  } else b.hidden=true;
 }
 
-// ---------- today ----------
-let cur=byDate[TODAY]?TODAY:(TODAY<START?START:LAST);
+// ---------- lesson ----------
+let cur=nextUp();
 const TYPE={v:'Watch',i:'Interactive',r:'Read',p:'Practice'};
 function resLinks(keys,color){
   return keys.map(k=>{const r=RES[k];return `<a href="${r[1]}" target="_blank" rel="noopener" style="--c:${color}"><small>${TYPE[r[2]]}</small>${r[0]}</a>`}).join('');
 }
 function checkBox(key,label){
-  const d=done[cur]||{};
+  const d=chk[cur]||{};
   return `<input type="checkbox" class="check" data-k="${key}" aria-label="${label} done" ${d[key]?'checked':''}>`;
 }
 function renderToday(){
   const v=document.getElementById('v-today');
-  const day=byDate[cur];
-  const nav=`<div class="daynav"><button class="btn" id="prev" ${cur<=START?'disabled':''}>← ${fmt(addD(cur,-1),{month:'short',day:'numeric'})}</button>
-    ${cur!==TODAY&&byDate[TODAY]?'<button class="btn primary" id="gotoday">Today</button>':''}
-    <button class="btn" id="next" ${cur>=LAST?'disabled':''}>${fmt(addD(cur,1),{month:'short',day:'numeric'})} →</button></div>`;
-  let body='';
+  const nu=nextUp();
+  const nav=`<div class="daynav"><button class="btn" id="prev" ${cur<=0?'disabled':''}>← Lesson ${cur}</button>
+    ${cur!==nu?'<button class="btn primary" id="gotoday">Next up</button>':''}
+    <button class="btn" id="next" ${cur>=L.length-1?'disabled':''}>Lesson ${cur+2} →</button></div>`;
   const dueN=dueCards(false).length;
-  if(day.kind==='lesson'){
-    const l=L[day.idx], p=phase(l[0]), d=done[cur]||{};
-    const all=d.learn&&d.build&&d.cards&&(d.edu||!window.eduFor(day.idx));
-    body=`<article class="day" style="--c:${p.color}">
+  const l=L[cur], p=phase(l[0]), d=chk[cur]||{}, e=window.eduFor(cur);
+  const all=d.learn&&d.build&&d.cards&&(d.edu||!e);
+  const body=`<article class="day" style="--c:${p.color}">
       <div class="day-head">
-        <div class="chips"><span class="chip ph">${p.name}</span><span class="chip">Lesson ${day.idx+1} of ${L.length}</span><span class="chip">${fmt(cur,{weekday:'long',month:'short',day:'numeric'})}</span></div>
+        <div class="chips"><span class="chip ph">${p.name}</span><span class="chip">Lesson ${cur+1} of ${L.length}</span>${cur===nu&&!lessonComplete(cur)?'<span class="chip">Next up</span>':''}</div>
         <h2>${l[1]}</h2>
         <p class="note">Phase goal: ${p.goal}</p>
       </div>
@@ -316,85 +286,64 @@ function renderToday(){
         <section class="block learn ${d.learn?'done':''}">
           <div class="bhead">${checkBox('learn','Learn')}<h3>Learn</h3><span class="dur">3–4 h</span></div>
           <ul class="obj">${l[2].map(o=>`<li>${o}</li>`).join('')}</ul>
-          ${(window.DETAIL&&window.DETAIL[day.idx])?`<div class="exact"><div class="eyebrow">Exactly what to do today</div><ol>${window.DETAIL[day.idx].map(x=>`<li><a href="${x[1]}" target="_blank" rel="noopener">${x[0]}</a> <span class="mins">${x[2]} min</span></li>`).join('')}</ol></div>`:''}
+          ${(window.DETAIL&&window.DETAIL[cur])?`<div class="exact"><div class="eyebrow">Exactly what to do</div><ol>${window.DETAIL[cur].map(x=>`<li><a href="${x[1]}" target="_blank" rel="noopener">${x[0]}</a> <span class="mins">${x[2]} min</span></li>`).join('')}</ol></div>`:''}
           <div class="res">${resLinks(l[3],p.color)}</div>
           <p class="note">Watch or play with the visual first, then read, then type out every example yourself.</p>
         </section>
         <section class="block ${d.build?'done':''}">
           <div class="bhead">${checkBox('build','Build')}<h3>Build</h3><span class="dur">1–2 h</span></div>
           <div class="build">${l[4]}</div>
-          ${(window.LAB&&window.LAB[day.idx])?(()=>{const lb=window.LAB[day.idx]; return `<div class="exact"><div class="eyebrow">Lab steps</div><ol>${lb.steps.map(x=>`<li>${x}</li>`).join('')}</ol><p class="donewhen"><b>Done when:</b> ${lb.done}</p><div class="res">${lb.links.map(k=>`<a href="${k[1]}" target="_blank" rel="noopener">${k[0]}</a>`).join('')}</div></div>`})():''}
+          ${(window.LAB&&window.LAB[cur])?(()=>{const lb=window.LAB[cur]; return `<div class="exact"><div class="eyebrow">Lab steps</div><ol>${lb.steps.map(x=>`<li>${x}</li>`).join('')}</ol><p class="donewhen"><b>Done when:</b> ${lb.done}</p><div class="res">${lb.links.map(k=>`<a href="${k[1]}" target="_blank" rel="noopener">${k[0]}</a>`).join('')}</div></div>`})():''}
         </section>
-        ${(()=>{const e=window.eduFor(day.idx); return e?`<section class="block ${d.edu?'done':''}">
+        ${e?`<section class="block ${d.edu?'done':''}">
           <div class="bhead">${checkBox('edu','Educative')}<h3>Educative</h3><span class="dur">1.5 h</span></div>
-          <p><a href="${e.url}" target="_blank" rel="noopener">${e.course}</a> <span class="note">· day ${e.day} of ${e.days}</span></p>
+          <p><a href="${e.url}" target="_blank" rel="noopener">${e.course}</a> <span class="note">· part ${e.day} of ${e.days}</span></p>
           <ul class="obj">${e.units.map(u=>`<li>${u}</li>`).join('')}</ul>
-        </section>`:''})()}
+        </section>`:''}
         <section class="block ${d.cards?'done':''}">
           <div class="bhead">${checkBox('cards','Flashcards')}<h3>Flashcards</h3><span class="dur">15–20 min</span></div>
-          <p>${l[5].length} new card${l[5].length>1?'s':''} today · ${dueN} due in total</p>
+          <p>${l[5].length} new card${l[5].length>1?'s':''} in this lesson · ${dueN} due in total</p>
           <div><button class="btn primary" id="study">Review cards</button></div>
         </section>
       </div>
-      ${all?'<div class="allday">Day complete. Nice work.</div>':''}
+      ${all?'<div class="allday">Lesson complete. Nice work.</div>':''}
     </article>`;
-  } else if(day.kind==='review'){
-    const week=[]; for(let k=1;k<=6;k++){const x=byDate[addD(cur,-k)]; if(x&&x.kind==='lesson') week.unshift(x);}
-    const d=done[cur]||{};
-    body=`<article class="day" style="--c:var(--ink-3)">
-      <div class="day-head"><div class="chips"><span class="chip">Sunday review</span><span class="chip">${fmt(cur,{weekday:'long',month:'short',day:'numeric'})}</span></div>
-      <h2>Review and rest</h2><p class="note">About an hour. Keep it light.</p></div>
-      <div class="blocks">
-        <section class="block learn ${d.learn?'done':''}"><div class="bhead">${checkBox('learn','Recap')}<h3>Recap the week</h3><span class="dur">30 min</span></div>
-          <ul class="obj">${week.length?week.map(x=>`<li>${L[x.idx][1]}</li>`).join(''):'<li>No lessons this week.</li>'}</ul>
-          <p class="note">Explain each topic out loud in two minutes, as if to a customer. Redo one build task you rushed.</p></section>
-        <section class="block ${d.build?'done':''}"><div class="bhead">${checkBox('build','Commit')}<h3>Commit and write up</h3><span class="dur">20 min</span></div>
-          <div class="build">Push the week's code. Add 3 lines to your learning log: what clicked, what didn't, what's next.</div></section>
-        <section class="block ${d.cards?'done':''}"><div class="bhead">${checkBox('cards','Flashcards')}<h3>Flashcards</h3><span class="dur">20 min</span></div>
-          <p>${dueN} due</p><div><button class="btn primary" id="study">Review cards</button></div></section>
-      </div></article>`;
-  } else {
-    const trail=day.kind==='trail', d=done[cur]||{};
-    body=`<article class="day" style="--c:${trail?'#1E8A6E':'#C98A00'}">
-      <div class="day-head"><div class="chips"><span class="chip">${trail?'Trail day':'Travel'}</span><span class="chip">${fmt(cur,{weekday:'long',month:'short',day:'numeric'})}</span></div>
-      <h2>${day.label}</h2><p class="note">${trail?'No lessons. The plan picks up where you left off after the block.':'No lessons while you travel. Ten minutes of cards on your phone keeps the streak.'}</p></div>
-      <div class="blocks"><section class="block ${d.cards?'done':''}"><div class="bhead">${checkBox('cards','Flashcards')}<h3>Optional: flashcards</h3><span class="dur">10 min</span></div>
-      <p>${dueN} due</p><div><button class="btn primary" id="study">Review cards</button></div></section></div></article>`;
-  }
   v.innerHTML=`<div style="display:flex;flex-direction:column;gap:14px">${nav}${body}</div>`;
   const P=document.getElementById('prev'), N=document.getElementById('next'), T=document.getElementById('gotoday'), S=document.getElementById('study');
-  if(P) P.onclick=()=>{cur=addD(cur,-1);renderToday();};
-  if(N) N.onclick=()=>{cur=addD(cur,1);renderToday();};
-  if(T) T.onclick=()=>{cur=TODAY;renderToday();};
+  if(P) P.onclick=()=>{cur--;renderToday();};
+  if(N) N.onclick=()=>{cur++;renderToday();};
+  if(T) T.onclick=()=>{cur=nextUp();renderToday();};
   if(S) S.onclick=()=>show('cards');
   v.querySelectorAll('.check').forEach(c=>c.onchange=()=>{
-    const d=done[cur]||(done[cur]={}); d[c.dataset.k]=c.checked; save('ul-done',done); renderHeader(); renderToday();
+    const d=chk[cur]||(chk[cur]={}); d[c.dataset.k]=c.checked; save('ul-check',chk); renderHeader(); renderToday();
   });
 }
 
-// ---------- plan ----------
+// ---------- checklist ----------
 function renderPlan(){
   const v=document.getElementById('v-plan');
-  const curPh=(byDate[TODAY]&&byDate[TODAY].kind==='lesson')?L[byDate[TODAY].idx][0]:null;
+  const nu=nextUp(), curPh=L[nu][0];
   const groups=PH.map(p=>{
     const rows=L.map((l,i)=>[l,i]).filter(([l])=>l[0]===p.id).map(([l,i])=>{
-      const d=done[lessonDate[i]]||{}; const st=d.learn&&d.build?'full':(d.learn||d.build?'half':'');
-      return `<div class="row ${lessonDate[i]===TODAY?'today':''}" data-d="${lessonDate[i]}" style="--c:${p.color}" role="button" tabindex="0">
-        <span class="d">${fmt(lessonDate[i],{month:'short',day:'numeric'})}</span><span class="t">${l[1]}</span><span class="dot ${st}"></span></div>`;}).join('');
+      const d=chk[i]||{}, full=lessonComplete(i), half=!full&&(d.learn||d.build);
+      return `<div class="row ${full?'is-done':''} ${i===nu&&!full?'today':''}" style="--c:${p.color}">
+        <input type="checkbox" class="check" data-i="${i}" aria-label="Lesson ${i+1} done" ${full?'checked':''}>
+        <span class="t" data-open="${i}" role="button" tabindex="0"><span class="d">${i+1}.</span> ${l[1]}${half?' <span class="part">in progress</span>':''}</span>
+        <span class="open" data-open="${i}" aria-hidden="true">→</span></div>`;}).join('');
     const idx=L.map((l,i)=>l[0]===p.id?i:-1).filter(i=>i>=0);
     const n=idx.filter(lessonComplete).length;
-    const first=lessonDate[idx[0]], last=lessonDate[idx[idx.length-1]];
-    return `<details class="ph-group" style="--c:${p.color}" ${p.id===curPh||(!curPh&&p.id==='launch')?'open':''}>
-      <summary><h3>${p.name}</h3><span class="g mono">${n}/${idx.length} · ${fmt(first,{month:'short',day:'numeric'})} – ${fmt(last,{month:'short',day:'numeric'})}</span></summary>${rows}</details>`;
+    return `<details class="ph-group" style="--c:${p.color}" ${p.id===curPh?'open':''}>
+      <summary><h3>${p.name}</h3><span class="g mono">${n}/${idx.length}</span></summary>${rows}</details>`;
   }).join('');
-  const offs=OFF.map(o=>`<div>· ${fmt(o[0],{month:'short',day:'numeric'})}${o[1]!==o[0]?' – '+fmt(o[1],{month:'short',day:'numeric'}):''}: ${o[3]}</div>`).join('');
   v.innerHTML=`<div class="plan">
-    <p class="note">${L.length} lessons from ${fmt(START,{month:'short',day:'numeric',year:'numeric'})} to ${fmt(LAST,{month:'short',day:'numeric',year:'numeric'})}. Monday–Saturday are lesson days, Sundays are review. Tap a lesson to open it.</p>
+    <p class="note">${L.length} lessons, in order. Tick a lesson when its Learn and Build are done; tap the title to open it. Go at your own pace.</p>
     ${groups}
-    <details class="ph-group" style="--c:#2E8B8B"><summary><h3>Educative track · 1.5 h a day</h3><span class="g">${window.EDU.length} blocks</span></summary><div class="offs" style="padding:12px 18px">${window.EDU.map(e=>`<div>· ${fmt(lessonDate[e.from],{month:'short',day:'numeric'})} – ${fmt(lessonDate[e.to],{month:'short',day:'numeric'})}: ${e.url.includes('/courses/')?`<a href="${e.url}" target="_blank" rel="noopener">${e.course}</a>`:e.course}</div>`).join('')}</div></details>
-    <details class="ph-group" style="--c:var(--ink-3)"><summary><h3>Days off built in</h3><span class="g">${OFF.length} blocks</span></summary><div class="offs" style="padding:12px 18px">${offs}</div></details>
+    <details class="ph-group" style="--c:#2E8B8B"><summary><h3>Educative track · 1.5 h per lesson</h3><span class="g">${window.EDU.length} courses</span></summary><div class="offs" style="padding:12px 18px">${window.EDU.map(e=>`<div>· Lessons ${e.from+1}–${e.to+1}: ${e.url.includes('/courses/')?`<a href="${e.url}" target="_blank" rel="noopener">${e.course}</a>`:e.course}</div>`).join('')}</div></details>
   </div>`;
-  v.querySelectorAll('.row').forEach(r=>{const go=()=>{cur=r.dataset.d;show('today');}; r.onclick=go; r.onkeydown=e=>{if(e.key==='Enter')go();};});
+  v.querySelectorAll('.row .check').forEach(c=>c.onchange=()=>{
+    const i=+c.dataset.i, d=chk[i]||(chk[i]={}); d.learn=d.build=c.checked; save('ul-check',chk); renderHeader(); renderPlan();
+  });
+  v.querySelectorAll('[data-open]').forEach(r=>{const go=()=>{cur=+r.dataset.open;show('today');}; r.onclick=go; r.onkeydown=e=>{if(e.key==='Enter')go();};});
 }
 
 // ---------- flashcards ----------
@@ -406,8 +355,7 @@ function grade(g){
   if(g===0){s.b=0; s.due=TODAY; queue.push(c);}
   else {s.b=Math.min(INTERVAL.length-1,s.b+(g===2?2:1)); s.due=addD(TODAY,INTERVAL[s.b]);}
   srs[c.id]=s; save('ul-srs',srs);
-  cardsDone[TODAY]=(cardsDone[TODAY]||0)+1; save('ul-cardlog',cardsDone);
-  if(!queue.length){const d=done[TODAY]||(done[TODAY]={}); d.cards=true; save('ul-done',done);}
+  if(!queue.length){const i=nextUp(), d=chk[i]||(chk[i]={}); d.cards=true; save('ul-check',chk);}
   flipped=false; renderHeader(); renderCards();
 }
 function renderCards(){
@@ -425,14 +373,14 @@ function renderCards(){
         <div class="face"><div class="meta"><span>${p.name}</span><span>${queue.length} left</span></div><div class="q">${c.q}</div><div class="meta"><span>${L[c.li][1]}</span><span>Tap or space to flip</span></div></div>
         <div class="face back"><div class="meta"><span>Answer</span><span>${queue.length} left</span></div><div class="a">${c.a}</div><div class="meta"><span>${L[c.li][1]}</span><span>1 · 2 · 3 to grade</span></div></div>
       </div></button>
-      <div class="grade" ${flipped?'':'hidden'}><button class="again" data-g="0">Again<small>today</small></button><button class="good" data-g="1">Good<small>next box</small></button><button class="easy" data-g="2">Easy<small>skip a box</small></button></div>`;
+      <div class="grade" ${flipped?'':'hidden'}><button class="again" data-g="0">Again<small>now</small></button><button class="good" data-g="1">Good<small>next box</small></button><button class="easy" data-g="2">Easy<small>skip a box</small></button></div>`;
   } else {
     const locked=CARDS.filter(x=>!unlocked(x)).length;
-    stage=`<div class="empty"><h3>All caught up</h3><p>${pool.length} cards unlocked so far. New cards unlock with each lesson day.</p>
+    stage=`<div class="empty"><h3>All caught up</h3><p>${pool.length} cards unlocked so far. New cards unlock as you work through lessons.</p>
       ${!ahead&&locked?`<button class="btn" id="ahead">Study ahead (${locked} locked cards)</button>`:''}
       ${ahead?'<button class="btn" id="behind">Back to unlocked cards only</button>':''}</div>`;
   }
-  v.innerHTML=`<div style="display:flex;flex-direction:column;gap:16px">${filt}<div class="stage">${boxes}${stage}<p class="hint">Spaced repetition: right answers move a card to a longer interval; misses come back today.</p></div></div>`;
+  v.innerHTML=`<div style="display:flex;flex-direction:column;gap:16px">${filt}<div class="stage">${boxes}${stage}<p class="hint">Spaced repetition: right answers move a card to a longer interval; misses come right back.</p></div></div>`;
   v.querySelectorAll('.fbtn').forEach(b=>b.onclick=()=>{fPh=b.dataset.p||null; buildQueue(); renderCards();});
   const card=document.getElementById('card'); if(card) card.onclick=()=>{flipped=!flipped; renderCards();};
   v.querySelectorAll('.grade button').forEach(b=>b.onclick=()=>grade(+b.dataset.g));
@@ -452,11 +400,10 @@ function show(t){
     document.getElementById('t-'+x).setAttribute('aria-selected',x===t);
   });
   if(t==='today') renderToday(); if(t==='plan') renderPlan(); if(t==='cards'){buildQueue(); renderCards();}
-  try{localStorage.setItem('ul-tab',t)}catch(e){}
 }
-['today','plan','cards'].forEach(x=>document.getElementById('t-'+x).onclick=()=>{if(x==='today')cur=byDate[TODAY]?TODAY:cur; show(x);});
+['today','plan','cards'].forEach(x=>document.getElementById('t-'+x).onclick=()=>{if(x==='today')cur=nextUp(); show(x);});
 renderHeader();
-show(location.hash==='#cards'?'cards':location.hash==='#plan'?'plan':'today');
+show(location.hash==='#cards'?'cards':location.hash==='#lesson'?'today':'plan');
 })();
 </script>
 </body>
