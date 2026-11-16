@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Upskill Lab · 2-week sprint</title>
-<meta name="description" content="Nov 16–29, 2026: 3 hours a day. 90 minutes of Educative and 90 minutes of projects and online courses.">
+<meta name="description" content="Nov 16–29, 2026 data engineering sprint: 90 minutes of Educative and 90 minutes of pipeline building a day.">
 <script>(function(){var t;try{t=localStorage.getItem('theme')}catch(e){}if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t)})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -143,14 +143,14 @@ footer{color:var(--ink-3);font-size:.8rem;border-top:1px solid var(--line);paddi
     <div>
       <div class="eyebrow">Sprint 1 · Nov 16 → Nov 29, 2026</div>
       <h1>Upskill Lab</h1>
-      <p class="sub">Three hours a day for two weeks: <b>90 min of Educative</b>, then <b>90 min of projects and online courses</b>, then a few flashcards. Every step has a time box.</p>
+      <p class="sub">Data engineering sprint. Three hours a day: <b>90 min of Educative</b>, then <b>90 min building a real pipeline</b>, then 2–3 check questions.</p>
     </div>
     <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
       <button class="theme" id="theme" type="button">Toggle theme</button>
       <div class="stats">
         <div class="stat"><b id="s-day">—</b><span>Sprint day</span></div>
         <div class="stat"><b id="s-hrs">0</b><span>Hours done / 42</span></div>
-        <div class="stat"><b id="s-due">0</b><span>Cards due</span></div>
+        <div class="stat"><b id="s-due">0</b><span>Questions due</span></div>
       </div>
     </div>
   </header>
@@ -165,7 +165,7 @@ footer{color:var(--ink-3);font-size:.8rem;border-top:1px solid var(--line);paddi
   <nav class="tabs" role="tablist">
     <button class="tab" role="tab" id="t-day" aria-selected="true">Today</button>
     <button class="tab" role="tab" id="t-plan" aria-selected="false">Full plan</button>
-    <button class="tab" role="tab" id="t-cards" aria-selected="false">Flashcards<span class="n" id="t-due" hidden>0</span></button>
+    <button class="tab" role="tab" id="t-cards" aria-selected="false">Questions<span class="n" id="t-due" hidden>0</span></button>
   </nav>
 
   <main id="v-day"></main>
@@ -218,7 +218,7 @@ function header(){
   // overall time split by course/track
   const tally={};
   D.forEach(d=>{tally['c:'+d.edu.c]=(tally['c:'+d.edu.c]||0)+90;tally['t:'+d.build.t]=(tally['t:'+d.build.t]||0)+90;});
-  const items=Object.entries(tally).sort((a,b)=>a[0].localeCompare(b[0])).map(([k,v])=>{const [kind,id]=k.split(':');const o=kind==='c'?C[id]:T[id];return {name:o.name,color:o.color,h:v/60,kind};});
+  const items=Object.entries(tally).sort((a,b)=>a[0][0].localeCompare(b[0][0])).map(([k,v])=>{const [kind,id]=k.split(':');const o=kind==='c'?C[id]:T[id];return {name:o.name,color:o.color,h:v/60,kind};});
   document.getElementById('split').innerHTML=items.map(x=>`<i style="flex:${x.h};background:${x.color}" title="${x.name}: ${x.h} h"></i>`).join('');
   document.getElementById('legend').innerHTML=items.map(x=>`<span style="--c:${x.color}">${x.kind==='c'?'Educative · ':''}${x.name} <span class="mono" style="color:var(--ink-3)">${x.h}h</span></span>`).join('');
   // strip
@@ -254,7 +254,7 @@ function renderDay(){
         <div class="bh"><span class="eyebrow" style="color:${c.color}">Block 1 · Educative</span><span class="dur">90 min</span></div>
         <p class="course"><a href="${c.url}" target="_blank" rel="noopener">${c.name}</a><small>${d.edu.unit}</small></p>
         ${steps(d,'e',d.edu.steps)}
-        <div class="out"><b>Output</b>${d.edu.out}</div>
+        ${d.edu.out?`<div class="out"><b>Output</b>${d.edu.out}</div>`:''}
       </section>
       <section class="block" style="--c:${t.color}">
         <div class="bh"><span class="eyebrow" style="color:${t.color}">Block 2 · ${t.name}</span><span class="dur">90 min</span></div>
@@ -264,9 +264,9 @@ function renderDay(){
         <div class="links">${d.build.links.map(l=>`<a href="${l[1]}" target="_blank" rel="noopener">${l[0]} ↗</a>`).join('')}</div>
       </section>
       <section class="block" style="--c:var(--ink-3)">
-        <div class="bh"><span class="eyebrow">Wind-down · flashcards</span><span class="dur">~10 min</span></div>
-        <p>${d.cards.length} new cards today · ${due().length} due now</p>
-        <div><button class="btn primary" id="study">Review cards</button></div>
+        <div class="bh"><span class="eyebrow">After the exercises · check questions</span><span class="dur">~5 min</span></div>
+        <p>${d.cards.length} questions today · ${due().length} due now (includes spaced review)</p>
+        <div><button class="btn primary" id="study">Answer them</button></div>
       </section>
       ${full(d)?'<div class="allday">Day complete. 3 hours in the bank.</div>':''}
     </article></div>`;
@@ -280,7 +280,7 @@ function renderDay(){
 
 function renderPlan(){
   const v=document.getElementById('v-plan');
-  v.innerHTML=`<div class="plan"><p class="note">All 14 days. Educative runs as three courses back to back: System Design Fundamentals → Agentic System Design → Coding Interview Patterns in Python. Tap a day to open it.</p>
+  v.innerHTML=`<div class="plan"><p class="note">All 14 days. Educative: finish System Design Fundamentals by Wed 11/18, then Data Engineering Foundations in Python through Sun 11/29. The project half builds one data pipeline: Postgres → Airflow → GCS → BigQuery → dbt, plus Spark and Kafka labs. Tap a day to open it.</p>
   ${D.map((d,i)=>{const c=C[d.edu.c],t=T[d.build.t];return `<div class="prow ${d.date===S.race?'race':''} ${full(d)?'full':''}" data-i="${i}" role="button" tabindex="0">
     <div class="dt">${nice(d.date)}<small>Day ${i+1} · ${minsDone(d)}/180</small></div>
     <div class="cell" style="--c:${c.color}">${d.edu.unit}<small>${c.name}</small></div>
